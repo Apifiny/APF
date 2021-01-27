@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "./VotingToken.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract APF is ERC20, Ownable {
+contract APF is VotingToken, Ownable {
 
     mapping(address => bool) public issuerMap;
 
-    constructor() ERC20("Apifny Token", "APF") public  {
+    constructor() ERC20("Apifny Token", "APF") public {
     }
     
     modifier onlyIssuer() {
@@ -19,18 +19,13 @@ contract APF is ERC20, Ownable {
         issuerMap[_issuer] = _isIssuer;
     }
 
-    function mint(address _to, uint256 _amount) public onlyIssuer {
+
+    function mint(address _to, uint256 _amount) external onlyIssuer {
         _mint(_to, _amount);
+        _moveDelegates(address(0), _delegates[_to], _amount);
     }
-
-    function burn(uint256 amount) public {
-        _burn(_msgSender(), amount);
-    }
-
-    function burnFrom(address account, uint256 amount) public virtual {
-        uint256 decreasedAllowance = allowance(account, _msgSender()).sub(amount, "ERC20: burn amount exceeds allowance");
-
-        _approve(account, _msgSender(), decreasedAllowance);
-        _burn(account, amount);
+    function burn(uint256 _amount) external {
+        _burn(_msgSender(), _amount);
+        _moveDelegates(_delegates[_msgSender()], address(0), _amount);
     }
 }
