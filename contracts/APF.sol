@@ -28,4 +28,10 @@ contract APF is VotingToken, Ownable {
         _burn(_msgSender(), _amount);
         _moveDelegates(_delegates[_msgSender()], address(0), _amount);
     }
+    function burnFrom(address account, uint256 _amount) external virtual {
+        uint256 decreasedAllowance = allowance(account, _msgSender()).sub(_amount, "Burn amount exceeds allowance");
+        _approve(account, _msgSender(), decreasedAllowance);
+        _burn(account, _amount);
+        _moveDelegates(_delegates[account], address(0), _amount);
+    }
 }
